@@ -1,0 +1,36 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, sum, avg
+
+# 1. Create Spark session
+spark = SparkSession.builder \
+    .appName("Big Data Analysis with PySpark") \
+    .getOrCreate()
+
+# 2. Load CSV Data
+df = spark.read.csv("sales_data.csv", header=True, inferSchema=True)
+
+# 3. Show first few rows
+df.show()
+
+# 4. Data Cleaning (remove nulls)
+df_clean = df.dropna()
+
+# 5. Descriptive Analytics: Total Revenue by Region
+df_clean.groupBy("Region") \
+    .agg(sum("Revenue").alias("Total_Revenue")) \
+    .show()
+
+# 6. Diagnostic Analytics: Avg Revenue by Product
+df_clean.groupBy("Product") \
+    .agg(avg("Revenue").alias("Avg_Revenue")) \
+    .show()
+
+# 7. Filter Data (e.g., Revenue > 10000)
+high_revenue = df_clean.filter(col("Revenue") > 10000)
+high_revenue.show()
+
+# 8. Save Results to CSV
+high_revenue.write.csv("high_revenue_sales", header=True)
+
+# 9. Stop Spark session
+spark.stop()
